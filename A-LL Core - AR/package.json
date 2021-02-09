@@ -1,0 +1,21 @@
+{
+  "name": "com.all.core.ar",
+  "version": "0.0.1",
+  "displayName": "A-LL Core - AR",
+  "description": "This is the Augmented Reality core package of A-LL Creative Technology mobile Unity Framework",
+  "unity": "2019.1",
+  "keywords": [
+    "A-LL Creative Technology",
+    "Core",
+    "A-LL",
+    "AR"
+  ],
+  "author": {
+    "name": "A-LL Creative Technology",
+    "email": "support@a-ll.tech",
+    "url": "https://a-ll.tech/"
+  },
+  "type": "library",
+  "dependencies": {
+  }
+}
