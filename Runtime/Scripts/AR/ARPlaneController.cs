@@ -44,6 +44,8 @@ public class ARPlaneController : MonoBehaviour
         if (!ARGestureController.GetInstance().OneFingerTapDetection(out Vector2 tapPosition))
             return false;
 
+        Debug.Log("Spawning");
+
         Ray planeRay = ARController.GetInstance().arCamera.ScreenPointToRay(tapPosition);
         if (TryToHitWithClosestPlane(planeRay, out ARRaycastHit raycastHit))
         {
