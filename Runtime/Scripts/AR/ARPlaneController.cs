@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -18,8 +18,8 @@ public class ARPlaneController : MonoBehaviour
     public ARPlaneManager arPlaneManager = null;
 
     [SerializeField] private GameObject arModelToBePlacedPrefab = null;
-
     static List<ARRaycastHit> arRaycastHits = new List<ARRaycastHit>();
+    private List<ARModel> spawnedPlanarARModels = new List<ARModel>();
 
     TrackableId currentlyTrackedPlaneID;
 
@@ -36,6 +36,30 @@ public class ARPlaneController : MonoBehaviour
     {
 
         TryToSpawnARModel();
+    }
+
+    public void DestroySpawnedARModels()
+    {
+        for (int i = 0; i < spawnedPlanarARModels.Count; i++)
+        {
+            ARModel currentARModel = spawnedPlanarARModels[i];
+
+            Destroy(currentARModel.arModel);
+
+            spawnedPlanarARModels.RemoveAt(i);
+            i--;
+        }
+    }
+
+    public void DestroyLastSpawnedARModel()
+    {
+        int lastItemIndex = spawnedPlanarARModels.Count - 1;
+
+        ARModel lastItem = spawnedPlanarARModels[lastItemIndex];
+
+        Destroy(lastItem.arModel);
+
+        spawnedPlanarARModels.RemoveAt(lastItemIndex);
     }
 
 
@@ -62,6 +86,13 @@ public class ARPlaneController : MonoBehaviour
             spawnedARModelGameObject.transform.rotation = Quaternion.LookRotation(newDirection);
 
             //spawnedARModelGameObject.transform.localScale = 0.1f * Vector3.one;
+
+            // store in the list of spawned models
+            ARModel spawnedARModel = new ARModel();
+            spawnedARModel.arModel = spawnedARModelGameObject;
+            spawnedARModel.arModelCurrentPlane = raycastHit.trackableId;
+
+            spawnedPlanarARModels.Add(spawnedARModel);
 
             Handheld.Vibrate();
 
@@ -115,6 +146,12 @@ public class ARPlaneController : MonoBehaviour
         //ScenesController.LogMe("ARPlaneController", "No plane");
         raycastHit = default;
         return false;
+    }
+
+    private class ARModel
+    {
+        public GameObject arModel;
+        public TrackableId arModelCurrentPlane;
     }
 
 }
