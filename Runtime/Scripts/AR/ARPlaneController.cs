@@ -23,6 +23,8 @@ public class ARPlaneController : MonoBehaviour
 
     TrackableId currentlyTrackedPlaneID;
 
+    [SerializeField] private int maxNbSpawnedARModelsAllowed;
+
     private void Awake()
     {
         instance = this;
@@ -62,13 +64,18 @@ public class ARPlaneController : MonoBehaviour
         spawnedPlanarARModels.RemoveAt(lastItemIndex);
     }
 
+    public int GetNbSpawnedARmodels()
+    {
+        return spawnedPlanarARModels.Count;
+    }
 
     private bool TryToSpawnARModel()
     {
-        if (!ARGestureController.GetInstance().OneFingerTapDetection(out Vector2 tapPosition))
+        if (GetNbSpawnedARmodels() == maxNbSpawnedARModelsAllowed)
             return false;
 
-        Debug.Log("Spawning");
+        if (!ARGestureController.GetInstance().OneFingerTapDetection(out Vector2 tapPosition))
+            return false;
 
         Ray planeRay = ARController.GetInstance().arCamera.ScreenPointToRay(tapPosition);
         if (TryToHitWithClosestPlane(planeRay, out ARRaycastHit raycastHit))
