@@ -14,6 +14,9 @@ public class ARPlaneController : MonoBehaviour
         return instance;
     }
 
+    public static event EventHandler OnARModelSpawned;
+
+
     private ARRaycastManager arRaycastManager;
     public ARPlaneManager arPlaneManager = null;
 
@@ -105,7 +108,13 @@ public class ARPlaneController : MonoBehaviour
 
             GlobalController.LogMe("New AR Model spawned: " + spawnedARModelGameObject.name);
 
-            return true;
+            // fires an event
+            if (OnARModelSpawned != null)
+            {
+                OnARModelSpawned(this, EventArgs.Empty);
+
+                return true;
+            }
         }
 
         return false;
