@@ -21,10 +21,15 @@ public class ARPlaneController : MonoBehaviour
     public ARPlaneManager arPlaneManager = null;
 
     [SerializeField] private GameObject arModelToBePlacedPrefab = null;
+
+    private readonly float AR_MODEL_MOVE_SPEED = 2f;
     static List<ARRaycastHit> arRaycastHits = new List<ARRaycastHit>();
     private List<ARModel> spawnedPlanarARModels = new List<ARModel>();
 
     TrackableId currentlyTrackedPlaneID;
+
+    private ARModel selectedARModel;
+    private Animator arModelAnimator; //so that we don't call GetComponent every frame when moving the character around
 
     [SerializeField] private int maxNbSpawnedARModelsAllowed;
 
@@ -39,8 +44,10 @@ public class ARPlaneController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
         TryToSpawnARModel();
+
+        MoveARModel();
+
     }
 
     public void DestroySpawnedARModels()
@@ -65,6 +72,9 @@ public class ARPlaneController : MonoBehaviour
         Destroy(lastItem.arModel);
 
         spawnedPlanarARModels.RemoveAt(lastItemIndex);
+
+        selectedARModel = null;
+        arModelAnimator = null;
     }
 
     public int GetNbSpawnedARmodels()
@@ -101,6 +111,9 @@ public class ARPlaneController : MonoBehaviour
             ARModel spawnedARModel = new ARModel();
             spawnedARModel.arModel = spawnedARModelGameObject;
             spawnedARModel.arModelCurrentPlane = raycastHit.trackableId;
+
+            selectedARModel = spawnedARModel;//preselect the newly spawned model
+            arModelAnimator = spawnedARModelGameObject.GetComponent<Animator>();
 
             spawnedPlanarARModels.Add(spawnedARModel);
 
@@ -162,6 +175,44 @@ public class ARPlaneController : MonoBehaviour
         //ScenesController.LogMe("ARPlaneController", "No plane");
         raycastHit = default;
         return false;
+    }
+
+    private void MoveARModel()
+    {
+        if (selectedARModel == null || arModelAnimator == null)
+            return;
+
+        arModelAnimator.SetBool("isFloating", Input.touchCount > 0);
+
+        // Move AR Model
+        if (ARGestureController.GetInstance().SwipeDetection(out Vector2 swipePointOrigin, out Vector2 swipePointEnd))
+        {
+
+            // infinite plane intersection
+            Ray touchRayOrigin = ARController.GetInstance().arCamera.ScreenPointToRay(swipePointOrigin);
+            Ray touchRayEnd = ARController.GetInstance().arCamera.ScreenPointToRay(swipePointEnd);
+
+            if (TryToHitWithClosestPlane(touchRayOrigin, out ARRaycastHit raycastHitOrigin, true, selectedARModel.arModelCurrentPlane) && TryToHitWithClosestPlane(touchRayEnd, out ARRaycastHit raycastHitEnd))
+            {
+                Vector3 projectedVector = raycastHitEnd.pose.position - raycastHitOrigin.pose.position;
+
+                TrackableId destinationPlane = raycastHitEnd.trackableId;
+
+                // normalize vector depending on the distance to avoid very big value when at the end of the plane
+                float meanDistance = (raycastHitOrigin.distance + raycastHitEnd.distance) * 0.5f;
+                float moveThreshold = AR_MODEL_MOVE_SPEED / meanDistance;
+                if (projectedVector.magnitude > moveThreshold && selectedARModel.arModelCurrentPlane == destinationPlane)
+                {
+                    projectedVector.Normalize();
+                    projectedVector *= moveThreshold;
+                }
+
+                selectedARModel.arModel.transform.position += projectedVector;
+
+                selectedARModel.arModelCurrentPlane = destinationPlane;
+
+            }
+        }
     }
 
     private class ARModel
