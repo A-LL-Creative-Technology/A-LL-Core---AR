@@ -22,7 +22,7 @@ public class ARPlaneController : MonoBehaviour
 
     [SerializeField] private GameObject arModelToBePlacedPrefab = null;
 
-    private readonly float AR_MODEL_MOVE_SPEED = 2f;
+    private readonly float AR_MODEL_MOVE_SPEED = 1f;
     static List<ARRaycastHit> arRaycastHits = new List<ARRaycastHit>();
     private List<ARModel> spawnedPlanarARModels = new List<ARModel>();
 
@@ -182,10 +182,12 @@ public class ARPlaneController : MonoBehaviour
         if (selectedARModel == null || arModelAnimator == null)
             return;
 
-        arModelAnimator.SetBool("isFloating", Input.touchCount > 0);
+        bool isSwiping = ARGestureController.GetInstance().SwipeDetection(out Vector2 swipePointOrigin, out Vector2 swipePointEnd);
+
+        arModelAnimator.SetBool("isFloating", isSwiping);
 
         // Move AR Model
-        if (ARGestureController.GetInstance().SwipeDetection(out Vector2 swipePointOrigin, out Vector2 swipePointEnd))
+        if (isSwiping)
         {
 
             // infinite plane intersection
