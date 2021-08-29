@@ -16,7 +16,6 @@ public class ARPlaneController : MonoBehaviour
 
     public static event EventHandler OnARModelSpawned;
 
-
     private ARRaycastManager arRaycastManager;
     public ARPlaneManager arPlaneManager = null;
 
