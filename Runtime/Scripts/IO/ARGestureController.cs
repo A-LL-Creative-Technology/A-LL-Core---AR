@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -23,6 +23,19 @@ public class ARGestureController : MonoBehaviour
     public void Awake()
     {
         instance = this;
+    }
+
+    public bool LongPressDetection(){
+        if(Input.touchCount == 1){
+            Touch touch = Input.GetTouch(0);
+
+            if(ShouldDiscardTouchOnUI(touch.position)){
+                return false;
+            }
+
+            return touch.phase != TouchPhase.Began && touch.phase != TouchPhase.Ended;
+        }
+        return false;
     }
 
     public bool OneFingerTapDetection(out Vector2 tapPosition)
@@ -159,5 +172,4 @@ public class ARGestureController : MonoBehaviour
         EventSystem.current.RaycastAll(touch, hits);
         return (hits.Count > 0); // discard swipe if an UI element is beneath
     }
-
 }
