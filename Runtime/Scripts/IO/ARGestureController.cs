@@ -25,6 +25,22 @@ public class ARGestureController : MonoBehaviour
         instance = this;
     }
 
+    public bool LongPressDetection()
+    {
+        if (Input.touchCount == 1)
+        {
+            Touch touch = Input.GetTouch(0);
+
+            if (ShouldDiscardTouchOnUI(touch.position))
+            {
+                return false;
+            }
+
+            return touch.phase != TouchPhase.Began && touch.phase != TouchPhase.Ended;
+        }
+        return false;
+    }
+
     public bool OneFingerTapDetection(out Vector2 tapPosition)
     {
         if (Input.touchCount == 1 && Input.GetTouch(0).phase == TouchPhase.Began)
@@ -159,5 +175,4 @@ public class ARGestureController : MonoBehaviour
         EventSystem.current.RaycastAll(touch, hits);
         return (hits.Count > 0); // discard swipe if an UI element is beneath
     }
-
 }

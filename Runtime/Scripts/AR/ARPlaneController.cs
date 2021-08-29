@@ -4,6 +4,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
+#if UNITY_IOS
+using UnityEngine.Apple.ReplayKit;
+#endif
 
 public class ARPlaneController : MonoBehaviour
 {
@@ -15,6 +18,7 @@ public class ARPlaneController : MonoBehaviour
     }
 
     public static event EventHandler OnARModelSpawned;
+    public bool isRecording = false;
 
     private ARRaycastManager arRaycastManager;
     public ARPlaneManager arPlaneManager = null;
@@ -181,12 +185,15 @@ public class ARPlaneController : MonoBehaviour
         if (selectedARModel == null || arModelAnimator == null)
             return;
 
-        bool isSwiping = ARGestureController.GetInstance().SwipeDetection(out Vector2 swipePointOrigin, out Vector2 swipePointEnd);
+        if (isRecording)
+        {
+            return;
+        }
 
-        arModelAnimator.SetBool("isFloating", isSwiping);
+        arModelAnimator.SetBool("isFloating", ARGestureController.GetInstance().LongPressDetection());
 
         // Move AR Model
-        if (isSwiping)
+        if (ARGestureController.GetInstance().SwipeDetection(out Vector2 swipePointOrigin, out Vector2 swipePointEnd))
         {
 
             // infinite plane intersection
