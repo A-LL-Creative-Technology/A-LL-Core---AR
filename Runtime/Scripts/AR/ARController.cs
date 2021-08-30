@@ -19,10 +19,13 @@ public class ARController : MonoBehaviour
     public Camera arCamera;
 
     public ARPlaneManager arPlaneManager;
-    
+
     private bool isCurrentlyPaused = false;
 
     private DateTime pauseTimestamp;
+
+    public static event EventHandler OnARReset;
+
 
     private void Awake()
     {
@@ -57,6 +60,11 @@ public class ARController : MonoBehaviour
     {
         // resetting AR Session
         arSession.Reset();
+
+        if (OnARReset != null)
+        {
+            OnARReset(this, EventArgs.Empty);
+        }
     }
 
     void OnApplicationPause(bool isPaused)
@@ -80,7 +88,7 @@ public class ARController : MonoBehaviour
             long elapsedTicks = DateTime.Now.Ticks - pauseTimestamp.Ticks;
             TimeSpan elapsedPauseSpan = new TimeSpan(elapsedTicks);
 
-            if (elapsedPauseSpan.Minutes > 10)
+            if (elapsedPauseSpan.Seconds > 30)
             {
                 ResetAR();
             }
