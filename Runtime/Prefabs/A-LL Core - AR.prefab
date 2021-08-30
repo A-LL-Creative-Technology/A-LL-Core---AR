@@ -153,7 +153,7 @@ MonoBehaviour:
   m_FocusMode: -1
   m_LightEstimationMode: -1
   m_AutoFocus: 1
-  m_LightEstimation: -1
+  m_LightEstimation: 0
   m_FacingDirection: 1
 --- !u!114 &627602472679065047
 MonoBehaviour:
@@ -316,9 +316,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0251e9f38eb045e897bfe317bf28750, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isRecording: 0
   arPlaneManager: {fileID: 627602473123451123}
   arModelToBePlacedPrefab: {fileID: -927199367670048503, guid: c20b46699b9cd41149cf8da571f1f77a,
     type: 3}
+  maxNbSpawnedARModelsAllowed: 0
 --- !u!1 &1715709006754515001
 GameObject:
   m_ObjectHideFlags: 0
@@ -409,6 +411,7 @@ Light:
   m_UseColorTemperature: 0
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
+  m_UseViewFrustumForShadowCasterCull: 1
   m_ShadowRadius: 0
   m_ShadowAngle: 0
 --- !u!1 &1715709007169770490
