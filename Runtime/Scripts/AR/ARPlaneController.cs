@@ -182,6 +182,12 @@ public class ARPlaneController : MonoBehaviour
 
     private void MoveARModel()
     {
+
+        // DEACTIVATE FOR ANDROID
+#if UNITY_ANDROID
+        return;
+#endif
+
         if (selectedARModel == null || arModelAnimator == null)
             return;
 
@@ -189,6 +195,7 @@ public class ARPlaneController : MonoBehaviour
         {
             return;
         }
+
 
         arModelAnimator.SetBool("isFloating", ARGestureController.GetInstance().LongPressDetection());
 
