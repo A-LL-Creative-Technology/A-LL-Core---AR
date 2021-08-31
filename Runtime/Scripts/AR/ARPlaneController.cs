@@ -148,32 +148,27 @@ public class ARPlaneController : MonoBehaviour
             return true;
 
         }
-        else if (arRaycastManager.Raycast(sourceRay, arRaycastHits, TrackableType.PlaneWithinInfinity))
+        else if (arRaycastManager.Raycast(sourceRay, arRaycastHits, TrackableType.PlaneWithinInfinity) //second clause won't be evaluated when the first clause is true
+        || arRaycastManager.Raycast(sourceRay, arRaycastHits, TrackableType.PlaneEstimated)) //use plane estimated when infinity doesn't work (Android builds)
         {
-
             foreach (ARRaycastHit currentARRaycastHit in arRaycastHits)
             {
                 // highest priority - FORCE PLANE
                 if (forcePlane && currentARRaycastHit.trackableId == forcePlaneID)
                 {
                     raycastHit = currentARRaycastHit;
-
-                    //ScenesController.LogMe("ARPlaneController", "Force Plane");
                     return true;
                 }
 
                 if (currentARRaycastHit.trackableId == currentlyTrackedPlaneID)
                 {
                     raycastHit = currentARRaycastHit; // we return the same plane as priority that was last tracked with polygon
-                    //ScenesController.LogMe("ARPlaneController", "Same plane priority");
                     return true;
                 }
             }
 
             raycastHit = arRaycastHits[0]; // Raycast hits are sorted by distance, so the first one will be the closest hit
-            //ScenesController.LogMe("ARPlaneController", "Default first plane");
             return true;
-
         }
         //ScenesController.LogMe("ARPlaneController", "No plane");
         raycastHit = default;
@@ -182,20 +177,8 @@ public class ARPlaneController : MonoBehaviour
 
     private void MoveARModel()
     {
-
-        // DEACTIVATE FOR ANDROID
-#if UNITY_ANDROID
-        return;
-#endif
-
-        if (selectedARModel == null || arModelAnimator == null)
+        if (selectedARModel == null || arModelAnimator == null || isRecording)
             return;
-
-        if (isRecording)
-        {
-            return;
-        }
-
 
         arModelAnimator.SetBool("isFloating", ARGestureController.GetInstance().LongPressDetection());
 
@@ -225,7 +208,6 @@ public class ARPlaneController : MonoBehaviour
                 selectedARModel.arModel.transform.position += projectedVector;
 
                 selectedARModel.arModelCurrentPlane = destinationPlane;
-
             }
         }
     }
