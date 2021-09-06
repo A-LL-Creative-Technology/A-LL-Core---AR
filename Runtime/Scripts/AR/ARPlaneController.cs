@@ -25,6 +25,8 @@ public class ARPlaneController : MonoBehaviour
 
     [SerializeField] private GameObject arModelToBePlacedPrefab = null;
 
+    public GameObject[] arModels;
+
     private readonly float AR_MODEL_MOVE_SPEED = 1f;
     static List<ARRaycastHit> arRaycastHits = new List<ARRaycastHit>();
     private List<ARModel> spawnedPlanarARModels = new List<ARModel>();
@@ -42,6 +44,8 @@ public class ARPlaneController : MonoBehaviour
 
         arRaycastManager = GetComponent<ARRaycastManager>();
 
+        PreselectModel();
+
     }
 
     // Update is called once per frame
@@ -51,6 +55,20 @@ public class ARPlaneController : MonoBehaviour
 
         MoveARModel();
 
+    }
+
+    private void PreselectModel(){
+        GameObject obj = GameObject.Find("ModelSelector");
+        
+        if(obj == null)
+            return;
+        
+        ModelSelector selector = obj.GetComponent<ModelSelector>();
+
+        if(selector.currentSelectedModel < arModels.Length)
+            arModelToBePlacedPrefab = arModels[selector.currentSelectedModel];
+        else
+            arModelToBePlacedPrefab = arModels[0];
     }
 
     public void DestroySpawnedARModels()
@@ -148,32 +166,27 @@ public class ARPlaneController : MonoBehaviour
             return true;
 
         }
-        else if (arRaycastManager.Raycast(sourceRay, arRaycastHits, TrackableType.PlaneWithinInfinity))
+        else if (arRaycastManager.Raycast(sourceRay, arRaycastHits, TrackableType.PlaneWithinInfinity) //second clause won't be evaluated when the first clause is true
+        || arRaycastManager.Raycast(sourceRay, arRaycastHits, TrackableType.PlaneEstimated)) //use plane estimated when infinity doesn't work (Android builds)
         {
-
             foreach (ARRaycastHit currentARRaycastHit in arRaycastHits)
             {
                 // highest priority - FORCE PLANE
                 if (forcePlane && currentARRaycastHit.trackableId == forcePlaneID)
                 {
                     raycastHit = currentARRaycastHit;
-
-                    //ScenesController.LogMe("ARPlaneController", "Force Plane");
                     return true;
                 }
 
                 if (currentARRaycastHit.trackableId == currentlyTrackedPlaneID)
                 {
                     raycastHit = currentARRaycastHit; // we return the same plane as priority that was last tracked with polygon
-                    //ScenesController.LogMe("ARPlaneController", "Same plane priority");
                     return true;
                 }
             }
 
             raycastHit = arRaycastHits[0]; // Raycast hits are sorted by distance, so the first one will be the closest hit
-            //ScenesController.LogMe("ARPlaneController", "Default first plane");
             return true;
-
         }
         //ScenesController.LogMe("ARPlaneController", "No plane");
         raycastHit = default;
@@ -182,12 +195,8 @@ public class ARPlaneController : MonoBehaviour
 
     private void MoveARModel()
     {
-        if (selectedARModel == null || arModelAnimator == null)
+        if (selectedARModel == null || arModelAnimator == null || isRecording)
             return;
-
-        if(isRecording){
-            return;
-        }
 
         arModelAnimator.SetBool("isFloating", ARGestureController.GetInstance().LongPressDetection());
 
@@ -217,7 +226,6 @@ public class ARPlaneController : MonoBehaviour
                 selectedARModel.arModel.transform.position += projectedVector;
 
                 selectedARModel.arModelCurrentPlane = destinationPlane;
-
             }
         }
     }
