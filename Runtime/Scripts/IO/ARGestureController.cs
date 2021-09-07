@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -25,14 +25,11 @@ public class ARGestureController : MonoBehaviour
         instance = this;
     }
 
-    public bool LongPressDetection()
-    {
-        if (Input.touchCount == 1)
-        {
+    public bool LongPressDetection(){
+        if(Input.touchCount == 1){
             Touch touch = Input.GetTouch(0);
 
-            if (ShouldDiscardTouchOnUI(touch.position))
-            {
+            if(ShouldDiscardTouchOnUI(touch.position)){
                 return false;
             }
 

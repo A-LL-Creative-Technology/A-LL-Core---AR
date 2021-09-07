@@ -58,24 +58,22 @@ public class ARPlaneController : MonoBehaviour
         ScaleRotateARModel();
     }
 
-    private void PreselectModel()
-    {
+    private void PreselectModel(){
         GameObject obj = GameObject.Find("ModelSelector");
-
-        if (obj == null)
+        
+        if(obj == null)
             return;
-
+        
         ModelSelector selector = obj.GetComponent<ModelSelector>();
 
-        if (selector.currentSelectedModel < arModels.Length)
+        if(selector.currentSelectedModel < arModels.Length)
             arModelToBePlacedPrefab = arModels[selector.currentSelectedModel];
         else
             arModelToBePlacedPrefab = arModels[0];
     }
 
-    public void SelectModel(int i)
-    {
-        if (i < arModels.Length)
+    public void SelectModel(int i){
+        if(i < arModels.Length)
         {
             arModelToBePlacedPrefab = arModels[i];
         }
@@ -208,7 +206,7 @@ public class ARPlaneController : MonoBehaviour
         if (selectedARModel == null || isRecording)
             return;
 
-        if (arModelAnimator != null) //the model may not have an animator component, (eg. for the bar) so we don't want to trigger anything here
+        if(arModelAnimator != null) //the model may not have an animator component, (eg. for the bar) so we don't want to trigger anything here
             arModelAnimator.SetBool("isFloating", ARGestureController.GetInstance().LongPressDetection());
 
         // Move AR Model
