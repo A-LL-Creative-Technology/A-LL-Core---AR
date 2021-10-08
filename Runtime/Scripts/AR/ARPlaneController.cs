@@ -25,8 +25,6 @@ public class ARPlaneController : MonoBehaviour
 
     [SerializeField] private GameObject arModelToBePlacedPrefab = null;
 
-    public GameObject[] arModels;
-
     private readonly float AR_MODEL_MOVE_SPEED = 1f;
     static List<ARRaycastHit> arRaycastHits = new List<ARRaycastHit>();
     private List<ARModel> spawnedPlanarARModels = new List<ARModel>();
@@ -36,6 +34,10 @@ public class ARPlaneController : MonoBehaviour
     private ARModel selectedARModel;
     private Animator arModelAnimator; //so that we don't call GetComponent every frame when moving the character around
 
+    private bool canMove = false; //whether the user can move the ar model around or not, set by the feature controller
+    private bool canScale = false; //whether the user can rescale the ar model or not, set by the feature controller
+    private bool canRotate = false; //whether the user can rotate the ar model or not, set by the feature controller
+
     [SerializeField] private int maxNbSpawnedARModelsAllowed;
 
     private void Awake()
@@ -43,9 +45,21 @@ public class ARPlaneController : MonoBehaviour
         instance = this;
 
         arRaycastManager = GetComponent<ARRaycastManager>();
+    }
 
-        PreselectModel();
+    public void SetCanMove(bool value)
+    {
+        canMove = value;
+    }
 
+    public void SetCanScale(bool value)
+    {
+        canScale = value;
+    }
+
+    public void SetCanRotate(bool value)
+    {
+        canRotate = value;
     }
 
     // Update is called once per frame
@@ -58,25 +72,11 @@ public class ARPlaneController : MonoBehaviour
         ScaleRotateARModel();
     }
 
-    private void PreselectModel(){
-        GameObject obj = GameObject.Find("ModelSelector");
-        
-        if(obj == null)
-            return;
-        
-        ModelSelector selector = obj.GetComponent<ModelSelector>();
-
-        if(selector.currentSelectedModel < arModels.Length)
-            arModelToBePlacedPrefab = arModels[selector.currentSelectedModel];
-        else
-            arModelToBePlacedPrefab = arModels[0];
-    }
-
-    public void SelectModel(int i){
-        if(i < arModels.Length)
-        {
-            arModelToBePlacedPrefab = arModels[i];
-        }
+    //called by the featurecontroller to set the ar model to be placed depending on the experiment
+    //when more than 1 model are available for an experiment, the object picker will be enabled and the first item will be selected by default
+    public void SetModel(GameObject model)
+    {
+        arModelToBePlacedPrefab = model;
     }
 
     public void DestroySpawnedARModels()
@@ -154,7 +154,6 @@ public class ARPlaneController : MonoBehaviour
             if (OnARModelSpawned != null)
             {
                 OnARModelSpawned(this, EventArgs.Empty);
-
                 return true;
             }
         }
@@ -203,16 +202,15 @@ public class ARPlaneController : MonoBehaviour
 
     private void MoveARModel()
     {
-        if (selectedARModel == null || isRecording)
+        if (selectedARModel == null || isRecording || !canMove)
             return;
 
-        if(arModelAnimator != null) //the model may not have an animator component, (eg. for the bar) so we don't want to trigger anything here
+        if (arModelAnimator != null) //the model may not have an animator component (eg. for the bar), so we don't want to trigger anything here
             arModelAnimator.SetBool("isFloating", ARGestureController.GetInstance().LongPressDetection());
 
         // Move AR Model
         if (ARGestureController.GetInstance().SwipeDetection(out Vector2 swipePointOrigin, out Vector2 swipePointEnd))
         {
-
             // infinite plane intersection
             Ray touchRayOrigin = ARController.GetInstance().arCamera.ScreenPointToRay(swipePointOrigin);
             Ray touchRayEnd = ARController.GetInstance().arCamera.ScreenPointToRay(swipePointEnd);
@@ -233,7 +231,6 @@ public class ARPlaneController : MonoBehaviour
                 }
 
                 selectedARModel.arModel.transform.position += projectedVector;
-
                 selectedARModel.arModelCurrentPlane = destinationPlane;
             }
         }
@@ -249,8 +246,8 @@ public class ARPlaneController : MonoBehaviour
         {
             GameObject selectedARModelChild = selectedARModel.arModel.transform.gameObject;
 
-            selectedARModelChild.transform.localScale *= pinchScaleFactorDelta;
-            selectedARModel.arModel.transform.Rotate(0, pinchRotationDifferenceDelta, 0);
+            if (canScale) selectedARModelChild.transform.localScale *= pinchScaleFactorDelta;
+            if (canRotate) selectedARModel.arModel.transform.Rotate(0, pinchRotationDifferenceDelta, 0);
         }
     }
 
