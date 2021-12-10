@@ -56,6 +56,11 @@ public class ARController : MonoBehaviour
         }
     }
 
+    private void OnDestroy()
+    {
+        ResetAR();
+    }
+
     public void ResetAR()
     {
         // resetting AR Session
