@@ -34,9 +34,9 @@ public class ARPlaneController : MonoBehaviour
     private ARModel selectedARModel;
     private Animator arModelAnimator; //so that we don't call GetComponent every frame when moving the character around
 
-    private bool canMove = false; //whether the user can move the ar model around or not, set by the feature controller
-    private bool canScale = false; //whether the user can rescale the ar model or not, set by the feature controller
-    private bool canRotate = false; //whether the user can rotate the ar model or not, set by the feature controller
+    private bool canMove = true; //whether the user can move the ar model around or not, set by the feature controller
+    private bool canScale = true; //whether the user can rescale the ar model or not, set by the feature controller
+    private bool canRotate = true;//whether the user can rotate the ar model or not, set by the feature controller
 
     [SerializeField] private int maxNbSpawnedARModelsAllowed;
 
@@ -135,6 +135,8 @@ public class ARPlaneController : MonoBehaviour
             spawnedARModelGameObject.transform.rotation = Quaternion.LookRotation(newDirection);
 
             //spawnedARModelGameObject.transform.localScale = 0.1f * Vector3.one;
+            // float distanceToHit = raycastHit.distance;
+            // spawnedARModelGameObject.transform.localScale = distanceToHit * 0.3f * Vector3.one;
 
             // store in the list of spawned models
             ARModel spawnedARModel = new ARModel();
