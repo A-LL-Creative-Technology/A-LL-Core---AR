@@ -134,9 +134,8 @@ public class ARPlaneController : MonoBehaviour
             Vector3 newDirection = -Vector3.RotateTowards(spawnedARModelGameObject.transform.forward, arCameraToARModel, 2f * (float)Math.PI, 0.0f);
             spawnedARModelGameObject.transform.rotation = Quaternion.LookRotation(newDirection);
 
-            //spawnedARModelGameObject.transform.localScale = 0.1f * Vector3.one;
-            // float distanceToHit = raycastHit.distance;
-            // spawnedARModelGameObject.transform.localScale = distanceToHit * 0.3f * Vector3.one;
+            float distanceToHit = raycastHit.distance;
+            spawnedARModelGameObject.transform.localScale *= distanceToHit * 0.3f; //adapt local scale depending on prefab scale and distance to plane
 
             // store in the list of spawned models
             ARModel spawnedARModel = new ARModel();
