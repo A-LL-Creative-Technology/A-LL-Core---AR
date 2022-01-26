@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Lofelt.NiceVibrations;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.XR.ARFoundation;
@@ -147,7 +148,7 @@ public class ARPlaneController : MonoBehaviour
 
             spawnedPlanarARModels.Add(spawnedARModel);
 
-            Handheld.Vibrate();
+            HapticPatterns.PlayPreset(HapticPatterns.PresetType.LightImpact);
 
             GlobalController.LogMe("New AR Model spawned: " + spawnedARModelGameObject.name);
 
