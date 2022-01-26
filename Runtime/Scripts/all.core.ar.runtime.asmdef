@@ -1,9 +1,11 @@
 {
     "name": "all.core.ar.runtime.asmdef",
+    "rootNamespace": "",
     "references": [
         "GUID:a9420e37d7990b54abdef6688edbe313",
         "GUID:92703082f92b41ba80f0d6912de66115",
-        "GUID:3ddc281cbfcae419795a99d406d20cb1"
+        "GUID:3ddc281cbfcae419795a99d406d20cb1",
+        "GUID:57a0b9bc628ab4740af4b6f1f0b2e134"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
