@@ -164,7 +164,7 @@ public class ARGestureController : MonoBehaviour
         return validTouches;
     }
 
-    private bool ShouldDiscardTouchOnUI(Vector2 touchPos)
+    public bool ShouldDiscardTouchOnUI(Vector2 touchPos)
     {
         PointerEventData touch = new PointerEventData(EventSystem.current);
         touch.position = touchPos;
