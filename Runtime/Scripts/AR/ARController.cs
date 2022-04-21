@@ -51,7 +51,7 @@ public class ARController : MonoBehaviour
             // Start the AR session
             arSession.enabled = true;
 
-            GlobalController.LogMe("AR Session Origin is enabled");
+            Debug.Log("AR Session Origin is enabled");
 
         }
     }
@@ -77,7 +77,7 @@ public class ARController : MonoBehaviour
         if (!isCurrentlyPaused && isPaused)
         {
             // we just entered background
-            GlobalController.LogMe("Application just entered background");
+            Debug.Log("Application just entered background");
 
             // we save the time
             pauseTimestamp = DateTime.Now;
@@ -87,7 +87,7 @@ public class ARController : MonoBehaviour
         if (isCurrentlyPaused && !isPaused)
         {
             // we just entered foreground
-            GlobalController.LogMe("Application just entered foreground");
+            Debug.Log("Application just entered foreground");
 
             // if the pause was long, we reset everything
             long elapsedTicks = DateTime.Now.Ticks - pauseTimestamp.Ticks;

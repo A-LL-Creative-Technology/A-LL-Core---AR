@@ -150,7 +150,7 @@ public class ARPlaneController : MonoBehaviour
 
             HapticPatterns.PlayPreset(HapticPatterns.PresetType.LightImpact);
 
-            GlobalController.LogMe("New AR Model spawned: " + spawnedARModelGameObject.name);
+            Debug.Log("New AR Model spawned: " + spawnedARModelGameObject.name);
 
             // fires an event
             if (OnARModelSpawned != null)
