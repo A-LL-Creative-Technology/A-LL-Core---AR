@@ -324,7 +324,7 @@ MonoBehaviour:
   arPlaneManager: {fileID: 627602473123451123}
   arModelToBePlacedPrefab: {fileID: -927199367670048503, guid: c20b46699b9cd41149cf8da571f1f77a,
     type: 3}
-  maxNbSpawnedARModelsAllowed: 0
+  maxNbSpawnedARModelsAllowed: 1
 --- !u!1 &1715709006754515001
 GameObject:
   m_ObjectHideFlags: 0
