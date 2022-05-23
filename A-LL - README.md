@@ -13,4 +13,4 @@ To use this package in a unity project :
         - Nice Vibrations by Lofelt | HD Haptic Feedback for Mobile and Gamepads
         - Native Gallery for Android & iOS
         - Cross Platform Replay Kit
-            - Add an Assembly Reference Definition "ReplayKit" in Plugins/VoxelBusters
+            - Add an Assembly Definition Reference, named "ReplayKit", in Plugins/VoxelBusters
