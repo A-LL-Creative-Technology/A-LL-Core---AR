@@ -11,3 +11,6 @@ To use this package in a unity project :
     2. Select "My Assets" in the Package Manager to display paid Packages from the Asset Store
     3. Select and import all these packages
         - Nice Vibrations by Lofelt | HD Haptic Feedback for Mobile and Gamepads
+        - Native Gallery for Android & iOS
+        - Cross Platform Replay Kit
+            - Add an Assembly Reference Definition "ReplayKit" in Plugins/VoxelBusters
