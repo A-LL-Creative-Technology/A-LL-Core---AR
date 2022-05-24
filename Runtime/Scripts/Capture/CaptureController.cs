@@ -98,7 +98,7 @@ public class CaptureController : MonoBehaviour
 #if UNITY_ANDROID
             if (!Permission.HasUserAuthorizedPermission(Permission.Camera))
             {
-                arState = ARState.No_Camera_Permissions;
+                arState = CaptureState.No_Camera_Permissions;
                 return;
             }else{
                 arState = CaptureState.Permissions_Granted;
