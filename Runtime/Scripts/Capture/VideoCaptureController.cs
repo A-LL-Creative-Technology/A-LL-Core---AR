@@ -155,7 +155,7 @@ public class VideoCaptureController : MonoBehaviour
         ARPlaneController.GetInstance().isRecording = true;
 
         //Hide UI
-        NavigationController.GetInstance().HideHeader(.4f, false, !CaptureController.GetInstance().isUsingTransparentHeader);
+        NavigationController.GetInstance().HideHeader(.4f);
         NavigationController.GetInstance().HideFooter(.4f);
 
         

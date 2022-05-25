@@ -46,7 +46,7 @@ public class PhotoController : MonoBehaviour
 
         HapticPatterns.PlayPreset(HapticPatterns.PresetType.LightImpact);
 
-        NavigationController.GetInstance().HideHeader(0.4f, false, !CaptureController.GetInstance().isUsingTransparentHeader);
+        NavigationController.GetInstance().HideHeader(0.4f);
         NavigationController.GetInstance().HideFooter(0.4f);
         CaptureController.GetInstance().flash.SetActive(true);
         yield return new WaitForSeconds(.1f);
