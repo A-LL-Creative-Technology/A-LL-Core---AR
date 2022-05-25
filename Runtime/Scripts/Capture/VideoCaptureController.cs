@@ -101,7 +101,7 @@ public class VideoCaptureController : MonoBehaviour
         {
             case ReplayKitRecordingState.Failed:
                 NavigationController.GetInstance().OnNotificationOpen(false, -1f, "string:Erreur de permission", "Permission error (allow screen capture)", "Crea Tech");
-                NavigationController.GetInstance().ShowHeader(.4f);
+                NavigationController.GetInstance().ShowHeader(.4f, false, !CaptureController.GetInstance().isUsingTransparentHeader);
                 NavigationController.GetInstance().ShowFooter(.4f);
                 break;
             default:
@@ -155,7 +155,7 @@ public class VideoCaptureController : MonoBehaviour
         ARPlaneController.GetInstance().isRecording = true;
 
         //Hide UI
-        NavigationController.GetInstance().HideHeader(.4f);
+        NavigationController.GetInstance().HideHeader(.4f, false, !CaptureController.GetInstance().isUsingTransparentHeader);
         NavigationController.GetInstance().HideFooter(.4f);
 
         
@@ -254,7 +254,7 @@ public class VideoCaptureController : MonoBehaviour
             {
                 Debug.LogError("Error : " + error);
                 CaptureController.GetInstance().ActivateRecordingUI(false);
-                NavigationController.GetInstance().ShowHeader(.4f);
+                NavigationController.GetInstance().ShowHeader(.4f, false, !CaptureController.GetInstance().isUsingTransparentHeader);
                 NavigationController.GetInstance().ShowFooter(.4f);
                 ARPlaneController.GetInstance().isRecording = false;
 
@@ -289,8 +289,8 @@ public class VideoCaptureController : MonoBehaviour
 
         ARPlaneController.GetInstance().isRecording = false;
         CaptureController.GetInstance().ActivateRecordingUI(false);
-        NavigationController.GetInstance().ShowHeader();
-        NavigationController.GetInstance().ShowFooter();
+        NavigationController.GetInstance().ShowHeader(0.4f, false, !CaptureController.GetInstance().isUsingTransparentHeader);
+        NavigationController.GetInstance().ShowFooter(0.4f);
 
         OnVideoTaken?.Invoke(this, null);
     }

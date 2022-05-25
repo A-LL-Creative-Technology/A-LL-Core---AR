@@ -43,7 +43,7 @@ public class CaptureController : MonoBehaviour
 
     [Header("Optional")]
     public GameObject captureSlidingToggleMode; // in the case we have a photo/video sliding toggle in iOS native way
-
+    public bool isUsingTransparentHeader;
 
     private bool writeToGalleryPermissionGranted;
 
