@@ -168,7 +168,7 @@ public class ARPlaneController : MonoBehaviour
         return false;
     }
 
-    private bool TryToHitWithClosestPlane(Ray sourceRay, out ARRaycastHit raycastHit, bool forcePlane = false, TrackableId forcePlaneID = default)
+    public bool TryToHitWithClosestPlane(Ray sourceRay, out ARRaycastHit raycastHit, bool forcePlane = false, TrackableId forcePlaneID = default)
     {
 
         // we first give priority to planes within polygon (if forcePlane, we enforce the PlaneWithinInfinityForSpeed)
