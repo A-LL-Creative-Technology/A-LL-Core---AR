@@ -26,7 +26,7 @@ public class ARPlaneController : MonoBehaviour
 
     private GameObject arModelToBePlacedPrefab = null;
 
-    [HideInInspector] public GameObject spawnedARModelGameObject = null;
+    [HideInInspector] public GameObject lastSpawnedARModelGameObject = null;
 
     private readonly float AR_MODEL_MOVE_SPEED = 1f;
     static List<ARRaycastHit> arRaycastHits = new List<ARRaycastHit>();
@@ -131,33 +131,33 @@ public class ARPlaneController : MonoBehaviour
             Vector3 modelHitPosition = raycastHit.pose.position;
             Quaternion modelHitRotation = raycastHit.pose.rotation;
 
-            spawnedARModelGameObject = Instantiate(arModelToBePlacedPrefab, modelHitPosition, modelHitRotation); // we first place it far away so we don't see it before its position is ajusted according to the animation
+            lastSpawnedARModelGameObject = Instantiate(arModelToBePlacedPrefab, modelHitPosition, modelHitRotation); // we first place it far away so we don't see it before its position is ajusted according to the animation
 
             // make sure the new AR Model points towards the AR Camera
-            Vector3 arCameraToARModel = (spawnedARModelGameObject.transform.position - ARController.GetInstance().arCamera.transform.position).normalized;
+            Vector3 arCameraToARModel = (lastSpawnedARModelGameObject.transform.position - ARController.GetInstance().arCamera.transform.position).normalized;
             arCameraToARModel.y = 0; // we don't want to take into account the height
-            Vector3 newDirection = -Vector3.RotateTowards(spawnedARModelGameObject.transform.forward, arCameraToARModel, 2f * (float)Math.PI, 0.0f);
-            spawnedARModelGameObject.transform.rotation = Quaternion.LookRotation(newDirection);
+            Vector3 newDirection = -Vector3.RotateTowards(lastSpawnedARModelGameObject.transform.forward, arCameraToARModel, 2f * (float)Math.PI, 0.0f);
+            lastSpawnedARModelGameObject.transform.rotation = Quaternion.LookRotation(newDirection);
 
             if (shallRescaleBasedOnDistanceToCamera)
             {
                 float distanceToHit = raycastHit.distance;
-                spawnedARModelGameObject.transform.localScale *= distanceToHit * 0.3f; //adapt local scale depending on prefab scale and distance to plane
+                lastSpawnedARModelGameObject.transform.localScale *= distanceToHit * 0.3f; //adapt local scale depending on prefab scale and distance to plane
             }
 
             // store in the list of spawned models
             ARModel spawnedARModel = new ARModel();
-            spawnedARModel.arModel = spawnedARModelGameObject;
+            spawnedARModel.arModel = lastSpawnedARModelGameObject;
             spawnedARModel.arModelCurrentPlane = raycastHit.trackableId;
 
             selectedARModel = spawnedARModel;//preselect the newly spawned model
-            arModelAnimator = spawnedARModelGameObject.GetComponent<Animator>();
+            arModelAnimator = lastSpawnedARModelGameObject.GetComponent<Animator>();
 
             spawnedPlanarARModels.Add(spawnedARModel);
 
             HapticPatterns.PlayPreset(HapticPatterns.PresetType.LightImpact);
 
-            Debug.Log("New AR Model spawned: " + spawnedARModelGameObject.name);
+            Debug.Log("New AR Model spawned: " + lastSpawnedARModelGameObject.name);
 
             // fires an event
             if (OnARModelSpawned != null)
