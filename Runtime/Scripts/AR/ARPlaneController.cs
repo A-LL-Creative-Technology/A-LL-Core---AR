@@ -24,7 +24,9 @@ public class ARPlaneController : MonoBehaviour
     private ARRaycastManager arRaycastManager;
     public ARPlaneManager arPlaneManager = null;
 
-    public GameObject arModelToBePlacedPrefab = null;
+    private GameObject arModelToBePlacedPrefab = null;
+
+    [HideInInspector] public GameObject spawnedARModelGameObject = null;
 
     private readonly float AR_MODEL_MOVE_SPEED = 1f;
     static List<ARRaycastHit> arRaycastHits = new List<ARRaycastHit>();
@@ -129,7 +131,7 @@ public class ARPlaneController : MonoBehaviour
             Vector3 modelHitPosition = raycastHit.pose.position;
             Quaternion modelHitRotation = raycastHit.pose.rotation;
 
-            GameObject spawnedARModelGameObject = Instantiate(arModelToBePlacedPrefab, modelHitPosition, modelHitRotation); // we first place it far away so we don't see it before its position is ajusted according to the animation
+            spawnedARModelGameObject = Instantiate(arModelToBePlacedPrefab, modelHitPosition, modelHitRotation); // we first place it far away so we don't see it before its position is ajusted according to the animation
 
             // make sure the new AR Model points towards the AR Camera
             Vector3 arCameraToARModel = (spawnedARModelGameObject.transform.position - ARController.GetInstance().arCamera.transform.position).normalized;
