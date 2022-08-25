@@ -24,7 +24,7 @@ public class ARPlaneController : MonoBehaviour
     private ARRaycastManager arRaycastManager;
     public ARPlaneManager arPlaneManager = null;
 
-    [SerializeField] private GameObject arModelToBePlacedPrefab = null;
+    public GameObject arModelToBePlacedPrefab = null;
 
     private readonly float AR_MODEL_MOVE_SPEED = 1f;
     static List<ARRaycastHit> arRaycastHits = new List<ARRaycastHit>();
