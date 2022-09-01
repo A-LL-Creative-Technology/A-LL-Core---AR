@@ -24,7 +24,7 @@ public class ARPlaneController : MonoBehaviour
     private ARRaycastManager arRaycastManager;
     public ARPlaneManager arPlaneManager = null;
 
-    private GameObject arModelToBePlacedPrefab = null;
+    [SerializeField] private GameObject arModelToBePlacedPrefab = null;
 
     [HideInInspector] public GameObject lastSpawnedARModelGameObject = null;
 
@@ -131,7 +131,7 @@ public class ARPlaneController : MonoBehaviour
             Vector3 modelHitPosition = raycastHit.pose.position;
             Quaternion modelHitRotation = raycastHit.pose.rotation;
 
-            lastSpawnedARModelGameObject = Instantiate(arModelToBePlacedPrefab, modelHitPosition, modelHitRotation); // we first place it far away so we don't see it before its position is ajusted according to the animation
+            InstantiateARModel(modelHitPosition, modelHitRotation, null, raycastHit.trackableId);
 
             // make sure the new AR Model points towards the AR Camera
             Vector3 arCameraToARModel = (lastSpawnedARModelGameObject.transform.position - ARController.GetInstance().arCamera.transform.position).normalized;
@@ -144,16 +144,6 @@ public class ARPlaneController : MonoBehaviour
                 float distanceToHit = raycastHit.distance;
                 lastSpawnedARModelGameObject.transform.localScale *= distanceToHit * 0.3f; //adapt local scale depending on prefab scale and distance to plane
             }
-
-            // store in the list of spawned models
-            ARModel spawnedARModel = new ARModel();
-            spawnedARModel.arModel = lastSpawnedARModelGameObject;
-            spawnedARModel.arModelCurrentPlane = raycastHit.trackableId;
-
-            selectedARModel = spawnedARModel;//preselect the newly spawned model
-            arModelAnimator = lastSpawnedARModelGameObject.GetComponent<Animator>();
-
-            spawnedPlanarARModels.Add(spawnedARModel);
 
             HapticPatterns.PlayPreset(HapticPatterns.PresetType.LightImpact);
 
@@ -168,6 +158,28 @@ public class ARPlaneController : MonoBehaviour
         }
 
         return false;
+    }
+
+    public GameObject InstantiateARModel(Vector3 modelHitPosition, Quaternion modelHitRotation, Vector3? modelLocalScale = null, TrackableId? trackableId = null) // this syntax is for setting a default to Vector3
+    {
+        lastSpawnedARModelGameObject = Instantiate(arModelToBePlacedPrefab, modelHitPosition, modelHitRotation); // we first place it far away so we don't see it before its position is ajusted according to the animation
+
+        if(modelLocalScale != null)
+            lastSpawnedARModelGameObject.transform.localScale = (Vector3)modelLocalScale;
+
+        // store in the list of spawned models
+        ARModel spawnedARModel = new ARModel();
+        spawnedARModel.arModel = lastSpawnedARModelGameObject;
+
+        if(trackableId != null)
+            spawnedARModel.arModelCurrentPlane = (TrackableId)trackableId;
+
+        selectedARModel = spawnedARModel;//preselect the newly spawned model
+        arModelAnimator = lastSpawnedARModelGameObject.GetComponent<Animator>();
+
+        spawnedPlanarARModels.Add(spawnedARModel);
+
+        return lastSpawnedARModelGameObject;
     }
 
     public bool TryToHitWithClosestPlane(Ray sourceRay, out ARRaycastHit raycastHit, bool forcePlane = false, TrackableId forcePlaneID = default)
