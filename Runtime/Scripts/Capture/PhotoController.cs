@@ -24,7 +24,7 @@ public class PhotoController : MonoBehaviour
 
     public void TriggerPhotoCapture()
     {
-        if (NativeGallery.CheckPermission(NativeGallery.PermissionType.Write) != NativeGallery.Permission.Granted)
+        if (NativeGallery.CheckPermission(NativeGallery.PermissionType.Write, NativeGallery.MediaType.Image | NativeGallery.MediaType.Video) != NativeGallery.Permission.Granted)
         {
             NavigationController.GetInstance().OnNotificationOpen(false, -1f, "Permission error subtitle", "Permission error (allow save to camera roll)", "Crea Tech");
             return;
