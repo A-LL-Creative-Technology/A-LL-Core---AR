@@ -118,9 +118,9 @@ public class CaptureController : MonoBehaviour
         Debug.Log("A-LL Core ready: checking permissions");
 
         // Check permissions
-        if (NativeGallery.CheckPermission(NativeGallery.PermissionType.Write) != NativeGallery.Permission.Granted)
+        if (NativeGallery.CheckPermission(NativeGallery.PermissionType.Write, NativeGallery.MediaType.Image | NativeGallery.MediaType.Video) != NativeGallery.Permission.Granted)
         {
-            NativeGallery.RequestPermission(NativeGallery.PermissionType.Write);
+            NativeGallery.RequestPermission(NativeGallery.PermissionType.Write, NativeGallery.MediaType.Image | NativeGallery.MediaType.Video);
         } 
     }
 
