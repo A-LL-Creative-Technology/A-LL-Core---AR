@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using VoxelBusters.ReplayKit;
+using VoxelBusters.CoreLibrary;
+using VoxelBusters.ScreenRecorderKit;
 using Lofelt.NiceVibrations;
 #if UNITY_IOS
 using UnityEngine.Apple.ReplayKit;
@@ -24,6 +25,8 @@ public class VideoCaptureController : MonoBehaviour
     public static event EventHandler OnTakeVideo;
     public static event EventHandler OnVideoTaken;
 
+    private IScreenRecorder m_recorder;
+
     private void Awake()
     {
         instance = this;
@@ -31,51 +34,17 @@ public class VideoCaptureController : MonoBehaviour
 
     private void Update()
     {
-        if (!ReplayKitManager.IsRecordingAPIAvailable())
+        if (!m_recorder.CanRecord())
             return;
 
-        if (ARGestureController.GetInstance().OneFingerTapDetection(out Vector2 tapPosition) && ReplayKitManager.IsRecording())
+        if (ARGestureController.GetInstance().OneFingerTapDetection(out Vector2 tapPosition) && m_recorder.IsRecording())
             StopRecording();
     }
 
-    void OnEnable()
-    {
-        if(IsAvailable())
-        {
-            ReplayKitManager.DidInitialise += DidInitialise;
-            ReplayKitManager.DidRecordingStateChange += DidRecordingStateChange;
-        }
-            
-            
-    }
-    void OnDisable()
-    {
-        if(IsAvailable())
-        {
-            ReplayKitManager.DidInitialise -= DidInitialise;
-            ReplayKitManager.DidRecordingStateChange -= DidRecordingStateChange;
-        }
-            
-    }
-
-    private void DidInitialise(ReplayKitInitialisationState state, string message)
-    {
-        GlobalController.LogMe("Received Event Callback : DidInitialise [State:" + state.ToString() + " " + "Message:" + message);
-
-        switch (state)
-        {
-            case ReplayKitInitialisationState.Failed:
-                GlobalController.LogMe("ReplayKitManager.DidInitialise : Initialisation Failed with message[" + message + "]");
-                break;
-            default:
-                GlobalController.LogMe("Unknown State");
-                break;
-        }
-    }
-
-
     public void TriggerVideoCapture()
     {
+        // Invoke this method to start the video capture process
+
         if (NativeGallery.CheckPermission(NativeGallery.PermissionType.Write, NativeGallery.MediaType.Image | NativeGallery.MediaType.Video) != NativeGallery.Permission.Granted)
         {
             NavigationController.GetInstance().OnNotificationOpen(false, -1f, "Permission error subtitle", "Permission error (allow save to camera roll)", "Crea Tech");
@@ -84,37 +53,44 @@ public class VideoCaptureController : MonoBehaviour
 
         HapticPatterns.PlayPreset(HapticPatterns.PresetType.LightImpact);
 
-        Invoke("PrepareVideoRecording", .5f);
+        //Invoke("CreateVideoRecorder", .5f);
+        CreateVideoRecorder();
+    }
+
+    public void CreateVideoRecorder()
+    {
+        //Dispose if any recorder instance created earlier
+        Cleanup();
+        VideoRecorderRuntimeSettings settings = new VideoRecorderRuntimeSettings(enableMicrophone: true);
+        ScreenRecorderBuilder builder = ScreenRecorderBuilder.CreateVideoRecorder(settings);
+        m_recorder = builder.Build();
+
+        GlobalController.LogMe("Video Recorder Created.");
+
+        PrepareVideoRecording();
     }
 
     private void PrepareVideoRecording()
     {
-        //Hide UI
-        StartRecording();
-    }
-
-    private void DidRecordingStateChange(ReplayKitRecordingState state, string message)
-    {
-        Debug.Log("Received Event Callback : DidRecordingStateChange [State:" + state.ToString() + " " + "Message:" + message);
-
-        switch (state)
+        // prepare the video recorder and start recording on success
+        m_recorder.PrepareRecording(callback: (success, error) =>
         {
-            case ReplayKitRecordingState.Failed:
-                NavigationController.GetInstance().OnNotificationOpen(false, -1f, "string:Erreur de permission", "Permission error (allow screen capture)", "Crea Tech");
-                NavigationController.GetInstance().ShowHeader(.4f, false, !CaptureController.GetInstance().isUsingTransparentHeader);
-                NavigationController.GetInstance().ShowFooter(.4f);
-                break;
-            default:
-                Debug.Log("Unknown State");
-                break;
-        }
+            if (success)
+            {
+                GlobalController.LogMe("Prepare recording successful.");
+                StartRecording();
+            }
+            else
+            {
+                GlobalController.LogMe($"Prepare recording failed with error [{error}]");
+            }
+        });
     }
-
-
 
     public bool IsAvailable()
     {
-        bool isRecordingAPIAvailable = ReplayKitManager.IsRecordingAPIAvailable();
+        // bool isRecordingAPIAvailable = ReplayKitManager.IsRecordingAPIAvailable();
+        bool isRecordingAPIAvailable = m_recorder.CanRecord();
 
         string message = isRecordingAPIAvailable ? "Replay Kit recording API is available!" : "Replay Kit recording API is not available.";
 
@@ -122,18 +98,10 @@ public class VideoCaptureController : MonoBehaviour
         return isRecordingAPIAvailable;
     }
 
-    public void PrepareRecording(bool shallRecordMicrophone)
-    {
-        GlobalController.LogMe("Start preparing to record");
-        ReplayKitManager.SetMicrophoneStatus(shallRecordMicrophone);
-
-        ReplayKitManager.PrepareRecording();
-    }
-
     public void StartRecording()
     {
         GlobalController.LogMe("Start recording");
-        if (ReplayKitManager.IsRecording())
+        if (m_recorder.IsRecording())
         {
             //Recording already in progress
             Debug.Log("Recording already in progress");
@@ -146,8 +114,6 @@ public class VideoCaptureController : MonoBehaviour
 
 
         StartCoroutine(LaunchRecodingWorkflow());
-
-        //Replay kit started
     }
 
     private IEnumerator LaunchRecodingWorkflow()
@@ -180,7 +146,7 @@ public class VideoCaptureController : MonoBehaviour
 
         yield return new WaitForSeconds(CaptureController.ANIMATION_FADE_DURATION + .1f);
 
-        ReplayKitManager.StartRecording();
+        m_recorder.StartRecording(); // optional callback
 
         yield return new WaitForSeconds(.5f);
 
@@ -210,7 +176,7 @@ public class VideoCaptureController : MonoBehaviour
 
     private void CheckRecordingStatus()
     {
-        if (!ReplayKitManager.IsRecording())
+        if (!m_recorder.IsRecording())
          {
              GlobalController.LogMe("VideoCaptureController PERMISSION REFUSED, RESETING UI");
              //UI already disable in UI Controller, if failed record put UI back
@@ -224,35 +190,29 @@ public class VideoCaptureController : MonoBehaviour
 
     public void StopRecording()
     {
-        if (!ReplayKitManager.IsRecording())
+        if (!m_recorder.IsRecording())
         {
             //Recording not started"
             Debug.Log("Recording not started");
             return;
         }
 
-        GlobalController.LogMe("Stop recording");
+        GlobalController.LogMe("Stop the recording");
 
-       
 
-        //Recording is stopping...
-        StartCoroutine(StopAndSave());
 
-    }
+        //Stop recording
 
-    private IEnumerator StopAndSave()
-    {
-        
-
-        ReplayKitManager.StopRecording((filePath, error) => {
-            if (string.IsNullOrEmpty(error))
+        m_recorder.StopRecording((success, error) =>
+        {
+            if (success)
             {
-                
-                StartCoroutine(SaveVideo());
+                GlobalController.LogMe("Stopped recording");
+                SaveRecording();
             }
             else
             {
-                Debug.LogError("Error : " + error);
+                GlobalController.LogMe($"Stop recording failed with error: {error}");
                 CaptureController.GetInstance().ActivateRecordingUI(false);
                 NavigationController.GetInstance().ShowHeader(.4f, false, !CaptureController.GetInstance().isUsingTransparentHeader);
                 NavigationController.GetInstance().ShowFooter(.4f);
@@ -262,55 +222,62 @@ public class VideoCaptureController : MonoBehaviour
             }
         });
 
-        yield return null;
     }
 
-    
-
-    public IEnumerator SaveVideo() //Saves preview to gallery
+    private void SaveRecording()
     {
-        
-        if (ReplayKitManager.IsPreviewAvailable())
+        m_recorder.SaveRecording(null, (result, error) =>
         {
-            ReplayKitManager.SavePreview((error) =>
+            if (error == null)
             {
-                GlobalController.LogMe("Saved preview to gallery with error : " + ((error == null) ? "null" : error));
-            });
+                GlobalController.LogMe("Saved recording successfully :" + result.Path);
+                StartCoroutine(CaptureController.GetInstance().FadeInAndOut(CaptureController.GetInstance().coachingTextVideoSaved));
+                CaptureController.GetInstance().ActivateRecordingUI(false);
 
-            yield return StartCoroutine(CaptureController.GetInstance().FadeInAndOut(CaptureController.GetInstance().coachingTextVideoSaved));
-            CaptureController.GetInstance().ActivateRecordingUI(false);
-        }
-        else
-        {
-            GlobalController.LogMe("Recorded file not yet available. Please wait for ReplayKitRecordingState.Available status");
-        }
+                ShowRecordingPreview();
 
-        ReplayKitManager.Preview();
-
-        ARPlaneController.GetInstance().isRecording = false;
-        CaptureController.GetInstance().ActivateRecordingUI(false);
-        NavigationController.GetInstance().ShowHeader(0.4f, false, !CaptureController.GetInstance().isUsingTransparentHeader);
-        NavigationController.GetInstance().ShowFooter(0.4f);
-
-        OnVideoTaken?.Invoke(this, null);
+            }
+            else
+            {
+                GlobalController.LogMe($"Failed saving recording [{error}]");
+            }
+        });
     }
 
-    //private IEnumerator PreparePreview()
-    //{
-    //    Debug.Log("Prepare Preview");
-    //    while (ReplayKitManager.IsRecording() || !IsAvailable())
-    //    {
-    //        yield return null;
-    //    }
+    private void ShowRecordingPreview()
+    {
+        m_recorder.OpenRecording((success, error) =>
+        {
+            if (success)
+            {
+                GlobalController.LogMe($"Open recording successful");
+            }
+            else
+            {
+                GlobalController.LogMe($"Open recording failed with error [{error}]");
+            }
 
-    //    Debug.Log("Open Perview");
-    //    if (ReplayKitManager.IsPreviewAvailable())
-    //    {
-    //        ReplayKitManager.Preview();
-    //    }
-    //    else
-    //    {
-    //        GlobalController.LogMe("No preview available");
-    //    }        
-    //}
+            ARPlaneController.GetInstance().isRecording = false;
+            CaptureController.GetInstance().ActivateRecordingUI(false);
+            NavigationController.GetInstance().ShowHeader(0.4f, false, !CaptureController.GetInstance().isUsingTransparentHeader);
+            NavigationController.GetInstance().ShowFooter(0.4f);
+
+            OnVideoTaken?.Invoke(this, null);
+        });
+    }
+
+    private void Cleanup()
+    {
+        if (m_recorder != null)
+        {
+            if (m_recorder.IsRecording())
+            {
+                m_recorder.StopRecording();
+            }
+
+            m_recorder.Flush();
+        }
+
+        m_recorder = null;
+    }
 }
