@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using VoxelBusters.ReplayKit;
-using Lofelt.NiceVibrations;
+using MoreMountains.NiceVibrations;
 #if UNITY_IOS
 using UnityEngine.Apple.ReplayKit;
 #endif
@@ -82,7 +82,7 @@ public class VideoCaptureController : MonoBehaviour
             return;
         }
 
-        HapticPatterns.PlayPreset(HapticPatterns.PresetType.LightImpact);
+        MMVibrationManager.Haptic(HapticTypes.LightImpact);
 
         Invoke("PrepareVideoRecording", .5f);
     }

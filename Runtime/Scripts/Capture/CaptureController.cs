@@ -6,7 +6,6 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.XR.ARFoundation;
-using Lofelt.NiceVibrations;
 #if UNITY_ANDROID
 using UnityEngine.Android;
 #endif
