@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using Lofelt.NiceVibrations;
+using MoreMountains.NiceVibrations;
 using System;
 
 public class PhotoController : MonoBehaviour
@@ -44,7 +44,7 @@ public class PhotoController : MonoBehaviour
         // deactivate touch gesture in ARPlaneController
         ARPlaneController.GetInstance().isRecording = true;
 
-        HapticPatterns.PlayPreset(HapticPatterns.PresetType.LightImpact);
+        MMVibrationManager.Haptic(HapticTypes.LightImpact);
 
         NavigationController.GetInstance().HideHeader(0.4f);
         NavigationController.GetInstance().HideFooter(0.4f);

@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Lofelt.NiceVibrations;
+using MoreMountains.NiceVibrations;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.XR.ARFoundation;
@@ -145,7 +145,7 @@ public class ARPlaneController : MonoBehaviour
                 lastSpawnedARModelGameObject.transform.localScale *= distanceToHit * 0.3f; //adapt local scale depending on prefab scale and distance to plane
             }
 
-            HapticPatterns.PlayPreset(HapticPatterns.PresetType.LightImpact);
+            MMVibrationManager.Haptic(HapticTypes.LightImpact);
 
             Debug.Log("New AR Model spawned: " + lastSpawnedARModelGameObject.name);
 
