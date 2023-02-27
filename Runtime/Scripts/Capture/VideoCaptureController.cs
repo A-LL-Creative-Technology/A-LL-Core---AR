@@ -34,6 +34,9 @@ public class VideoCaptureController : MonoBehaviour
 
     private void Update()
     {
+        if (m_recorder == null)
+            return;
+
         if (!m_recorder.CanRecord())
             return;
 
