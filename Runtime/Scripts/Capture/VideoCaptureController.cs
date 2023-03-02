@@ -6,7 +6,6 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using VoxelBusters.CoreLibrary;
 using VoxelBusters.ScreenRecorderKit;
-using MoreMountains.NiceVibrations;
 using Lofelt.NiceVibrations;
 
 #if UNITY_IOS
