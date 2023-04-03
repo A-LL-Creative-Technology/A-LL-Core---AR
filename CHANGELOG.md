@@ -1,6 +1,22 @@
 @@ -0,0 +1,37 @@
 # Changelog
 
+## [2.0.0] - 2023-04-03
+
+### Added
+n/a
+
+### Changed
+- ARKit/ARCore/ARFoundation were updated to 5.x
+- Unity requirement updated to 2021.2 due to ARFoundation 5+
+
+### Fixed
+- iOS video stream lagging in AR on some recent iPhones fixed by ARKit/ARFoundation 5+
+
+### Update instructions
+- Update your project to Unity 2021.2+
+- All ARSession game objects have to be replaced by XRSession game objects
+
 ## [1.2.0] - 2023-03-01
 
 ### Added

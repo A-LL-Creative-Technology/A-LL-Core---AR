@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
+using Unity.XR.CoreUtils;
 
 public class ARController : MonoBehaviour
 {
@@ -14,7 +15,9 @@ public class ARController : MonoBehaviour
     }
 
     public ARSession arSession;
-    public ARSessionOrigin arSessionOrigin;
+    //public ARSessionOrigin arSessionOrigin;
+
+    public XROrigin xrOrigin;
 
     public Camera arCamera;
 
