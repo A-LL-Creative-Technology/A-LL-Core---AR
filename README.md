@@ -1,5 +1,8 @@
 # Augmented Reality Core package of A-LL Creative Technology mobile Unity Framework
 
+## Depracated
+To use version 2+, use https://github.com/A-LL-Creative-Technology/com.all.core.ar
+
 ## Installation
 
 To use this package in a unity project :
