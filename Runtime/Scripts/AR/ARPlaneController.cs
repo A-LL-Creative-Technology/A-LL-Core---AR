@@ -13,9 +13,12 @@ public class ARPlaneController : MonoBehaviour
 {
     private static ARPlaneController instance;
 
-    public static ARPlaneController GetInstance()
+    public static ARPlaneController Instance
     {
-        return instance;
+        get
+        {
+            return instance;
+        }
     }
 
     public static event EventHandler OnARModelSpawned;
@@ -47,7 +50,16 @@ public class ARPlaneController : MonoBehaviour
 
     private void Awake()
     {
-        instance = this;
+        if (instance == null)
+        {
+            instance = this;
+            //DontDestroyOnLoad(gameObject); // To keep the instance across different scenes
+        }
+        else if (instance != this)
+        {
+            Debug.LogError("Another instance of ARPlaneController has been created! Destroying this one.");
+            Destroy(this.gameObject);
+        }
 
         arRaycastManager = GetComponent<ARRaycastManager>();
     }
@@ -121,7 +133,7 @@ public class ARPlaneController : MonoBehaviour
         if (GetNbSpawnedARmodels() == maxNbSpawnedARModelsAllowed)
             return false;
 
-        if (!ARGestureController.GetInstance().OneFingerTapDetection(out Vector2 tapPosition))
+        if (!ARGestureController.Instance.OneFingerTapDetection(out Vector2 tapPosition))
             return false;
 
         Ray planeRay = ARController.GetInstance().arCamera.ScreenPointToRay(tapPosition);
@@ -227,10 +239,10 @@ public class ARPlaneController : MonoBehaviour
             return;
 
         if (arModelAnimator != null) //the model may not have an animator component (eg. for the bar), so we don't want to trigger anything here
-            arModelAnimator.SetBool("isFloating", ARGestureController.GetInstance().LongPressDetection());
+            arModelAnimator.SetBool("isFloating", ARGestureController.Instance.LongPressDetection());
 
         // Move AR Model
-        if (ARGestureController.GetInstance().SwipeDetection(out Vector2 swipePointOrigin, out Vector2 swipePointEnd))
+        if (ARGestureController.Instance.SwipeDetection(out Vector2 swipePointOrigin, out Vector2 swipePointEnd))
         {
             // infinite plane intersection
             Ray touchRayOrigin = ARController.GetInstance().arCamera.ScreenPointToRay(swipePointOrigin);
@@ -263,7 +275,7 @@ public class ARPlaneController : MonoBehaviour
             return;
 
         // Scale Rotate AR Model
-        if (ARGestureController.GetInstance().PinchDetection(out Vector2 pinch0PointOrigin, out Vector2 pinch1PointOrigin, out float pinchScaleFactorDelta, out float pinchRotationDifferenceDelta))
+        if (ARGestureController.Instance.PinchDetection(out Vector2 pinch0PointOrigin, out Vector2 pinch1PointOrigin, out float pinchScaleFactorDelta, out float pinchRotationDifferenceDelta))
         {
             GameObject selectedARModelChild = selectedARModel.arModel.transform.gameObject;
 

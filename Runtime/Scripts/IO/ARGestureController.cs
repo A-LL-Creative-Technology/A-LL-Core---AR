@@ -7,9 +7,12 @@ public class ARGestureController : MonoBehaviour
 {
     private static ARGestureController instance;
 
-    public static ARGestureController GetInstance()
+    public static ARGestureController Instance
     {
-        return instance;
+        get
+        {
+            return instance;
+        }
     }
 
     // pinch variables
@@ -22,7 +25,16 @@ public class ARGestureController : MonoBehaviour
 
     public void Awake()
     {
-        instance = this;
+        if (instance == null)
+        {
+            instance = this;
+            //DontDestroyOnLoad(gameObject); // To keep the instance across different scenes
+        }
+        else if (instance != this)
+        {
+            Debug.LogError("Another instance of ARGestureController has been created! Destroying this one.");
+            Destroy(this.gameObject);
+        }
     }
 
     public bool LongPressDetection(){
@@ -40,22 +52,17 @@ public class ARGestureController : MonoBehaviour
 
     public bool OneFingerTapDetection(out Vector2 tapPosition)
     {
+        tapPosition = default;
+
         if (Input.touchCount == 1 && Input.GetTouch(0).phase == TouchPhase.Began)
         {
-            Touch touch = Input.GetTouch(0);
-
-            if (ShouldDiscardTouchOnUI(touch.position))
+            if (!ShouldDiscardTouchOnUI(Input.GetTouch(0).position))
             {
-                tapPosition = default;
-                return false;
+                tapPosition = Input.GetTouch(0).position;
+                return true;
             }
-
-            tapPosition = touch.position;
-
-            return true;
         }
 
-        tapPosition = default;
         return false;
     }
 

@@ -18,9 +18,12 @@ public class VideoCaptureController : MonoBehaviour
 
     private static VideoCaptureController instance;
 
-    public static VideoCaptureController GetInstance()
+    public static VideoCaptureController Instance
     {
-        return instance;
+        get
+        {
+            return instance;
+        }
     }
 
     public static event EventHandler OnTakeVideo;
@@ -30,7 +33,16 @@ public class VideoCaptureController : MonoBehaviour
 
     private void Awake()
     {
-        instance = this;
+        if (instance == null)
+        {
+            instance = this;
+            //DontDestroyOnLoad(gameObject); // To keep the instance across different scenes
+        }
+        else if (instance != this)
+        {
+            Debug.LogError("Another instance of VideoCaptureController has been created! Destroying this one.");
+            Destroy(this.gameObject);
+        }
     }
 
     private void Update()
@@ -38,10 +50,10 @@ public class VideoCaptureController : MonoBehaviour
         if (m_recorder == null)
             return;
 
-        if (!m_recorder.CanRecord())
+        if (!m_recorder.IsRecording())
             return;
 
-        if (ARGestureController.GetInstance().OneFingerTapDetection(out Vector2 tapPosition) && m_recorder.IsRecording())
+        if (ARGestureController.Instance.OneFingerTapDetection(out Vector2 tapPosition) && m_recorder.IsRecording())
             StopRecording();
     }
 
@@ -63,13 +75,13 @@ public class VideoCaptureController : MonoBehaviour
 
     public void CreateVideoRecorder()
     {
-        //Dispose if any recorder instance created earlier
+        //Dispose of any recorder instance created earlier
         Cleanup();
         VideoRecorderRuntimeSettings settings = new VideoRecorderRuntimeSettings(enableMicrophone: true);
         ScreenRecorderBuilder builder = ScreenRecorderBuilder.CreateVideoRecorder(settings);
         m_recorder = builder.Build();
 
-        GlobalController.LogMe("Video Recorder Created.");
+        Debug.Log("Video Recorder Created.");
 
         PrepareVideoRecording();
     }
@@ -81,12 +93,12 @@ public class VideoCaptureController : MonoBehaviour
         {
             if (success)
             {
-                GlobalController.LogMe("Prepare recording successful.");
+                Debug.Log("Prepare recording successful.");
                 StartRecording();
             }
             else
             {
-                GlobalController.LogMe($"Prepare recording failed with error [{error}]");
+                Debug.Log($"Prepare recording failed with error [{error}]");
             }
         });
     }
@@ -98,13 +110,13 @@ public class VideoCaptureController : MonoBehaviour
 
         string message = isRecordingAPIAvailable ? "Replay Kit recording API is available!" : "Replay Kit recording API is not available.";
 
-        GlobalController.LogMe(message);
+        Debug.Log(message);
         return isRecordingAPIAvailable;
     }
 
     public void StartRecording()
     {
-        GlobalController.LogMe("Start recording");
+        Debug.Log("Start recording");
         if (m_recorder.IsRecording())
         {
             //Recording already in progress
@@ -122,16 +134,14 @@ public class VideoCaptureController : MonoBehaviour
 
     private IEnumerator LaunchRecodingWorkflow()
     {
-        ARPlaneController.GetInstance().isRecording = true;
+        ARPlaneController.Instance.isRecording = true;
 
         //Hide UI
         NavigationController.GetInstance().HideHeader(.4f);
         NavigationController.GetInstance().HideFooter(.4f);
 
-        
-
         //Show coaching
-        yield return StartCoroutine(CaptureController.GetInstance().FadeInAndOut(CaptureController.GetInstance().coachingTextStopVideo));
+        yield return StartCoroutine(CaptureController.Instance.FadeInAndOut(CaptureController.Instance.coachingTextStopVideo));
 
         //Display Countdown
         //TextMeshProUGUI countdownText = ARUIController.GetInstance().coachingTextCountdown.GetComponent<TextMeshProUGUI>();
@@ -142,19 +152,30 @@ public class VideoCaptureController : MonoBehaviour
         //    countdownText.text = i + "...";
         //    yield return StartCoroutine(ARUIController.GetInstance().FadeInAndOut(ARUIController.GetInstance().coachingTextCountdown));
         //}
-        CaptureController.GetInstance().ActivateRecordingUI(true);
-        CanvasGroup watermark = CaptureController.GetInstance().watermarkContainer.GetComponent<CanvasGroup>();
+        CaptureController.Instance.ActivateRecordingUI(true);
+        CanvasGroup watermark = CaptureController.Instance.watermarkContainer.GetComponent<CanvasGroup>();
         watermark.alpha = 0f;
 
         LeanTween.alphaCanvas(watermark, 1f, CaptureController.ANIMATION_FADE_DURATION).setEaseInOutExpo();
 
         yield return new WaitForSeconds(CaptureController.ANIMATION_FADE_DURATION + .1f);
 
-        m_recorder.StartRecording(); // optional callback
-
-        yield return new WaitForSeconds(.5f);
-
+        m_recorder.StartRecording(callback: (success, error) =>
+        {
+            // seems like the callback is never reached on iOS
+            if (success)
+            {
+                Debug.Log("Started Recording");
+                CheckRecordingStatus();
+            }
+            else
+            {
+                Debug.Log($"Start recording failed with error [{error}]");
+            }
+        });
+#if UNITY_IOS
         CheckRecordingStatus();
+#endif
     }
 
     private IEnumerator FadeIn(Graphic graphic, float duration)
@@ -162,7 +183,6 @@ public class VideoCaptureController : MonoBehaviour
         graphic.color = new Color(graphic.color.r, graphic.color.g, graphic.color.b, 0);
         for (float i = 0; i <= duration; i += Time.deltaTime)
         {
-
             graphic.color = new Color(graphic.color.r, graphic.color.g, graphic.color.b, i / duration);
             yield return null;
         }
@@ -182,14 +202,13 @@ public class VideoCaptureController : MonoBehaviour
     {
         if (!m_recorder.IsRecording())
          {
-             GlobalController.LogMe("VideoCaptureController PERMISSION REFUSED, RESETING UI");
+             Debug.Log("VideoCaptureController PERMISSION REFUSED, RESETING UI");
              //UI already disable in UI Controller, if failed record put UI back
-             CaptureController.GetInstance().ActivateRecordingUI(false);
+             CaptureController.Instance.ActivateRecordingUI(false);
              return;
          }
 
-        GlobalController.LogMe("VideoCaptureController PERMISSION GRANTED START RECORDING");
-
+        Debug.Log("VideoCaptureController PERMISSION GRANTED START RECORDING");
     }
 
     public void StopRecording()
@@ -201,31 +220,27 @@ public class VideoCaptureController : MonoBehaviour
             return;
         }
 
-        GlobalController.LogMe("Stop the recording");
-
-
+        Debug.Log("Stop the recording");
 
         //Stop recording
-
         m_recorder.StopRecording((success, error) =>
         {
             if (success)
             {
-                GlobalController.LogMe("Stopped recording");
+                Debug.Log("Stopped recording");
                 SaveRecording();
             }
             else
             {
-                GlobalController.LogMe($"Stop recording failed with error: {error}");
-                CaptureController.GetInstance().ActivateRecordingUI(false);
-                NavigationController.GetInstance().ShowHeader(.4f, false, !CaptureController.GetInstance().isUsingTransparentHeader);
+                Debug.Log($"Stop recording failed with error: {error}");
+                CaptureController.Instance.ActivateRecordingUI(false);
+                NavigationController.GetInstance().ShowHeader(.4f, false, !CaptureController.Instance.isUsingTransparentHeader);
                 NavigationController.GetInstance().ShowFooter(.4f);
-                ARPlaneController.GetInstance().isRecording = false;
+                ARPlaneController.Instance.isRecording = false;
 
                 OnVideoTaken?.Invoke(this, null);
             }
         });
-
     }
 
     private void SaveRecording()
@@ -234,16 +249,16 @@ public class VideoCaptureController : MonoBehaviour
         {
             if (error == null)
             {
-                GlobalController.LogMe("Saved recording successfully :" + result.Path);
-                StartCoroutine(CaptureController.GetInstance().FadeInAndOut(CaptureController.GetInstance().coachingTextVideoSaved));
-                CaptureController.GetInstance().ActivateRecordingUI(false);
+                Debug.Log("Saved recording successfully :" + result.Path);
+                StartCoroutine(CaptureController.Instance.FadeInAndOut(CaptureController.Instance.coachingTextVideoSaved));
+                CaptureController.Instance.ActivateRecordingUI(false);
 
                 ShowRecordingPreview();
 
             }
             else
             {
-                GlobalController.LogMe($"Failed saving recording [{error}]");
+                Debug.Log($"Failed saving recording [{error}]");
             }
         });
     }
@@ -254,16 +269,16 @@ public class VideoCaptureController : MonoBehaviour
         {
             if (success)
             {
-                GlobalController.LogMe($"Open recording successful");
+                Debug.Log($"Open recording successful");
             }
             else
             {
-                GlobalController.LogMe($"Open recording failed with error [{error}]");
+                Debug.Log($"Open recording failed with error [{error}]");
             }
 
-            ARPlaneController.GetInstance().isRecording = false;
-            CaptureController.GetInstance().ActivateRecordingUI(false);
-            NavigationController.GetInstance().ShowHeader(0.4f, false, !CaptureController.GetInstance().isUsingTransparentHeader);
+            ARPlaneController.Instance.isRecording = false;
+            CaptureController.Instance.ActivateRecordingUI(false);
+            NavigationController.GetInstance().ShowHeader(0.4f, false, !CaptureController.Instance.isUsingTransparentHeader);
             NavigationController.GetInstance().ShowFooter(0.4f);
 
             OnVideoTaken?.Invoke(this, null);

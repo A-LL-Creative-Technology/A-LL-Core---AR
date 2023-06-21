@@ -17,9 +17,12 @@ public class CaptureController : MonoBehaviour
 
     private static CaptureController instance;
 
-    public static CaptureController GetInstance()
+    public static CaptureController Instance
     {
-        return instance;
+        get
+        {
+            return instance;
+        }
     }
 
 
@@ -78,7 +81,16 @@ public class CaptureController : MonoBehaviour
     }
     private void Awake()
     {
-        instance = this;
+        if (instance == null)
+        {
+            instance = this;
+            //DontDestroyOnLoad(gameObject); // To keep the instance across different scenes
+        }
+        else if (instance != this)
+        {
+            Debug.LogError("Another instance of CaptureController has been created! Destroying this one.");
+            Destroy(this.gameObject);
+        }
     }
 
     private void Start()
@@ -224,7 +236,7 @@ public class CaptureController : MonoBehaviour
 
         //switch (currentCaptureMode)
         //{
-        //    case CaptureModes.Video: VideoCaptureController.GetInstance().PrepareRecording(false);
+        //    case CaptureModes.Video: VideoCaptureController.Instance.PrepareRecording(false);
         //        break;
         //}
 
@@ -255,12 +267,12 @@ public class CaptureController : MonoBehaviour
         {
             case CaptureModes.Photo:
 
-                PhotoController.GetInstance().TriggerPhotoCapture();
+                PhotoController.Instance.TriggerPhotoCapture();
 
                 break;
             case CaptureModes.Video:
 
-                VideoCaptureController.GetInstance().TriggerVideoCapture();
+                VideoCaptureController.Instance.TriggerVideoCapture();
 
                 break;
         }

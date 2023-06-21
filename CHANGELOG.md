@@ -1,6 +1,18 @@
 @@ -0,0 +1,37 @@
 # Changelog
 
+## [1.2.1] - 2023-06-21
+
+### Added
+n/a
+
+### Changed
+n/a
+
+### Fixed
+
+- Tap to stop recording not working
+
 ## [1.2.0] - 2023-03-01
 
 ### Added

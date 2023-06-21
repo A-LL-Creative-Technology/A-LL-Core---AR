@@ -9,9 +9,12 @@ public class PhotoController : MonoBehaviour
 {
     private static PhotoController instance;
 
-    public static PhotoController GetInstance()
+    public static PhotoController Instance
     {
-        return instance;
+        get
+        {
+            return instance;
+        }
     }
 
     public static event EventHandler OnPhotoCaptured;
@@ -19,7 +22,16 @@ public class PhotoController : MonoBehaviour
 
     private void Awake()
     {
-        instance = this;
+        if (instance == null)
+        {
+            instance = this;
+            //DontDestroyOnLoad(gameObject); // To keep the instance across different scenes
+        }
+        else if (instance != this)
+        {
+            Debug.LogError("Another instance of PhotoController has been created! Destroying this one.");
+            Destroy(this.gameObject);
+        }
     }
 
     public void TriggerPhotoCapture()
@@ -42,20 +54,20 @@ public class PhotoController : MonoBehaviour
         }
 
         // deactivate touch gesture in ARPlaneController
-        ARPlaneController.GetInstance().isRecording = true;
+        ARPlaneController.Instance.isRecording = true;
 
         HapticPatterns.PlayPreset(HapticPatterns.PresetType.LightImpact);
 
         NavigationController.GetInstance().HideHeader(0.4f);
         NavigationController.GetInstance().HideFooter(0.4f);
-        CaptureController.GetInstance().flash.SetActive(true);
+        CaptureController.Instance.flash.SetActive(true);
         yield return new WaitForSeconds(.1f);
 
-        CaptureController.GetInstance().ActivateRecordingUI(true);
-        CanvasGroup watermark = CaptureController.GetInstance().watermarkContainer.GetComponent<CanvasGroup>();
+        CaptureController.Instance.ActivateRecordingUI(true);
+        CanvasGroup watermark = CaptureController.Instance.watermarkContainer.GetComponent<CanvasGroup>();
         watermark.alpha = 1f;
 
-        CaptureController.GetInstance().flash.SetActive(false);
+        CaptureController.Instance.flash.SetActive(false);
 
         yield return new WaitForEndOfFrame();
 
@@ -80,23 +92,23 @@ public class PhotoController : MonoBehaviour
 
         yield return new WaitForSeconds(.1f);
 
-        yield return StartCoroutine(CaptureController.GetInstance().FadeInAndOut(CaptureController.GetInstance().coachingTextPhotoSaved));
+        yield return StartCoroutine(CaptureController.Instance.FadeInAndOut(CaptureController.Instance.coachingTextPhotoSaved));
 
         //Fade Image
         LeanTween.alphaCanvas(watermark, 0f, CaptureController.ANIMATION_FADE_DURATION).setEaseInOutExpo().setOnComplete(() => {
-            CaptureController.GetInstance().ActivateRecordingUI(false);
+            CaptureController.Instance.ActivateRecordingUI(false);
         });
 
         yield return new WaitForSeconds(CaptureController.ANIMATION_FADE_DURATION + .1f);
 
 
-        NavigationController.GetInstance().ShowHeader(.4f, false, !CaptureController.GetInstance().isUsingTransparentHeader);
+        NavigationController.GetInstance().ShowHeader(.4f, false, !CaptureController.Instance.isUsingTransparentHeader);
         NavigationController.GetInstance().ShowFooter(.4f);
 
         // To avoid memory leaks
         Destroy(texture2D);
         
-        ARPlaneController.GetInstance().isRecording = false;
+        ARPlaneController.Instance.isRecording = false;
 
         if (OnPhotoCaptured != null)
         {

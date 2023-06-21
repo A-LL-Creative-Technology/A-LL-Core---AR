@@ -1,6 +1,6 @@
 {
   "name": "com.all.core.ar",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "displayName": "A-LL Core - AR",
   "description": "This is the Augmented Reality core package of A-LL Creative Technology mobile Unity Framework",
   "unity": "2019.1",
@@ -17,9 +17,9 @@
   },
   "type": "library",
   "dependencies": {
-    "com.unity.xr.arcore": "4.1.7",
-    "com.unity.xr.arfoundation": "4.1.7",
-    "com.unity.xr.arkit": "4.1.7",
-    "com.unity.xr.management": "3.2.17"
+    "com.unity.xr.arcore": "4.2.8",
+    "com.unity.xr.arfoundation": "4.2.8",
+    "com.unity.xr.arkit": "4.2.8",
+    "com.unity.xr.management": "4.2.1"
   }
 }
